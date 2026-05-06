@@ -1,0 +1,28 @@
+commit-msg:
+  commands:
+    conventional-commit:
+      run: sh scripts/validate-commit-msg.sh {1}
+
+pre-commit:
+  parallel: true
+  commands:
+    format-lint:
+      glob:
+        - "**/*.{py,pyi}"
+      run: |
+        python -m ruff --version >/dev/null 2>&1 || exit 0
+        python -m ruff format {staged_files}
+        python -m ruff check --fix {staged_files}
+        git add {staged_files}
+
+    type-check:
+      glob:
+        - "**/*.{py,pyi}"
+      run: |
+        python -m mypy --version >/dev/null 2>&1 || exit 0
+        python -m mypy .
+
+pre-push:
+  commands:
+    rebase:
+      run: sh scripts/rebase-workflow.sh develop
