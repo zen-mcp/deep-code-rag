@@ -26,7 +26,7 @@ from qdrant_client.http.models import (
 )
 
 from ingestion.chunker import EnrichedChunk, iter_project_chunks
-from ingestion.embedder import BaseEmbedder, create_embedder
+from ingestion.embedder import LocalEmbedder, create_embedder
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ class QdrantIndexer:
         self,
         qdrant_url: str = "http://localhost:6333",
         qdrant_api_key: str | None = None,
-        embedder: BaseEmbedder | None = None,
+        embedder: LocalEmbedder | None = None,
         collection_name: str = COLLECTION_NAME,
     ):
         self.collection_name = collection_name
@@ -63,11 +63,9 @@ class QdrantIndexer:
         self._embedder_initialized = embedder is not None
 
     @property
-    def embedder(self) -> BaseEmbedder:
+    def embedder(self) -> LocalEmbedder:
         if not self._embedder_initialized:
-            self._embedder = create_embedder(
-                backend=os.getenv("EMBEDDING_BACKEND", "local")
-            )
+            self._embedder = create_embedder()
             self._embedder_initialized = True
         return self._embedder
 
